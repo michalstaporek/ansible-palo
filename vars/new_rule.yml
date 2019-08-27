@@ -1,0 +1,34 @@
+rule_name: Ansible_test_rule1
+action: allow
+antivirus:
+application:
+category:
+data_filtering:
+description:
+destination_ip:
+destination_zone:
+disable_server_response_inspection:
+disabled:
+file_blocking:
+group_profile:
+hip_profiles:
+icmp_unreachable:
+log_end:
+log_setting:
+log_start:
+negate_destination:
+negate_source:
+rule_type:
+schedule:
+service:
+source_ip:
+source_user:
+source_zone:
+spyware:
+tag_name:
+url_filtering:
+vsys:
+vulnerability:
+wildfire_analysis:
+location:
+existing_rule:
