@@ -1,0 +1,71 @@
+---
+
+- name: Disable existing security rules on the firewall
+  hosts: localhost
+  connection: local
+  gather_facts: False
+
+  roles:
+    - role: PaloAltoNetworks.paloaltonetworks
+
+  tasks:
+  - name: Grab the credentials from ansible-vault
+    include_vars: 'firewall-secrets.yml'
+    no_log: 'yes'
+
+  - name: Set up an empty list variables
+    set_fact:
+      vsys1_rules: []
+
+  - name: Build a list of vsys1 unused rules from a file
+    set_fact:
+      vsys1_rules: '{{ vsys1_rules + [ item ] }}'
+    with_lines: cat ./vars/vsys1_rules
+
+  - name: Get all rules in vsys1 and their config
+    panos_security_rule_facts:
+      provider: '{{ provider }}'
+      all_details: 'yes'
+    register: all_rules
+
+  - name: Disable unused rules in vsys1
+    panos_security_rule:
+      provider: '{{ provider }}'
+      rule_name: '{{ item.rule_name }}'
+      action: '{{ item.action }}'
+      antivirus: '{{ item.antivirus[0] | default(omit, true) }}'
+      application: '{{ item.application }}'
+      category: '{{ item.category | default(omit, true) }}'
+      data_filtering: '{{ item.data_filtering[0] | default(omit, true) }}'
+      description: '{{ item.description | default(omit, true) }}'
+      destination_ip: '{{ item.destination_ip }}'
+      destination_zone: '{{ item.destination_zone }}'
+      disable_server_response_inspection: '{{ item.disable_server_response_inspection | default(omit, true) }}'
+      disabled: 'yes'
+      file_blocking: '{{ item.file_blocking[0] | default(omit, true) }}'
+      group_profile: '{{ item.group_profile | default(omit, true) }}'
+      hip_profiles: '{{ item.hip_profiles | default(omit, true) }}'
+      icmp_unreachable: '{{ item.icmp_unreachable | default(omit, true) }}'
+      log_end: '{{ item.log_end | default(omit, true) }}'
+      log_setting: '{{ item.log_setting | default(omit, true) }}'
+      log_start: '{{ item.log_start | default(omit, true) }}'
+      negate_destination: '{{ item.negate_destination | default(omit, true) }}'
+      negate_source: '{{ item.negate_source | default(omit, true) }}'
+      rule_type: '{{ item.rule_type | default(omit, true) }}'
+      schedule: '{{ item.schedule | default(omit, true) }}'
+      service: '{{ item.service }}'
+      source_ip: '{{ item.source_ip }}'
+      source_user: '{{ item.source_user }}'
+      source_zone: '{{ item.source_zone }}'
+      spyware: '{{ item.spyware[0] | default(omit, true) }}'
+      tag_name: '{{ item.tag_name | default(omit, true) }}'
+      url_filtering: '{{ item.url_filtering[0] | default(omit, true) }}'
+      vsys: 'vsys1'
+      vulnerability: '{{ item.vulnerability[0] | default(omit, true) }}'
+      wildfire_analysis: '{{ item.wildfire_analysis[0] | default(omit, true) }}'
+      commit: false
+    loop: '{{ all_rules.policy }}'
+    loop_control:
+      label: '{{ item.rule_name }}'
+    when:
+      - item.rule_name in vsys1_rules
