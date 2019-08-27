@@ -1,0 +1,65 @@
+- name: Add some security rules to the firewall
+  hosts: localhost
+  connection: local
+  gather_facts: False
+
+  roles:
+    - role: PaloAltoNetworks.paloaltonetworks
+
+  tasks:
+  - name: Grab the credentials from ansible-vault
+    include_vars: 'firewall-secrets.yml'
+    no_log: 'yes'
+
+#  - name: Set up an empty dictionary variable
+#    set_fact:
+#      new_rule: []
+#
+#  - name: Build a list of policy atributes from a file
+#    set_fact:
+#      new_rule: '{{ new_rule|combine(item) }}'
+#    with_lines: cat ./vars/new_rule
+
+  - name: include vars from new_rule.yaml into new_rule variable
+    include_vars: 
+      file: new_rule.yml
+      name: new_rule
+
+  - name: Add a security policy to the firewall
+    panos_security_rule:
+      provider: '{{ provider }}'
+      rule_name: '{{ new_rule.rule_name }}'
+      action: '{{ new_rule.action }}'
+      antivirus: '{{ new_rule.antivirus | default(omit, true) }}'
+      application: '{{ new_rule.application | default(omit, true) }}'
+      category: '{{ new_rule.category | default(omit, true) }}'
+      data_filtering: '{{ new_rule.data_filtering | default(omit, true) }}'
+      description: '{{ new_rule.description | default(omit, true) }}'
+      destination_ip: '{{ new_rule.destination_ip | default(omit, true) }}'
+      destination_zone: '{{ new_rule.destination_zone }}'
+      disable_server_response_inspection: '{{ new_rule.disable_server_response_inspection | default(omit, true) }}'
+      disabled: '{{ new_rule.disabled | default(omit, true) }}'
+      file_blocking: '{{ new_rule.file_blocking | default(omit, true) }}'
+      group_profile: '{{ new_rule.group_profile | default(omit, true) }}'
+      hip_profiles: '{{ new_rule.hip_profiles | default(omit, true) }}'
+      icmp_unreachable: '{{ new_rule.icmp_unreachable | default(omit, true) }}'
+      log_end: '{{ new_rule.log_end | default(omit, true) }}'
+      log_setting: '{{ new_rule.log_setting | default(omit, true) }}'
+      log_start: '{{ new_rule.log_start | default(omit, true) }}'
+      negate_destination: '{{ new_rule.negate_destination | default(omit, true) }}'
+      negate_source: '{{ new_rule.negate_source | default(omit, true) }}'
+      rule_type: '{{ new_rule.rule_type | default(omit, true) }}'
+      schedule: '{{ new_rule.schedule | default(omit, true) }}'
+      service: '{{ new_rule.service | default(omit, true) }}'
+      source_ip: '{{ new_rule.source_ip | default(omit, true) }}'
+      source_user: '{{ new_rule.source_user | default(omit, true) }}'
+      source_zone: '{{ new_rule.source_zone | default(omit, true) }}'
+      spyware: '{{ new_rule.spyware | default(omit, true) }}'
+      tag_name: '{{ new_rule.tag_name | default(omit, true) }}'
+      url_filtering: '{{ new_rule.url_filtering | default(omit, true) }}'
+      vsys: '{{ new_rule.vsys }}'
+      vulnerability: '{{ new_rule.vulnerability | default(omit, true) }}'
+      wildfire_analysis: '{{ new_rule.wildfire_analysis | default(omit, true) }}'
+      location: '{{ new_rule.location | default(omit, true) }}'
+      existing_rule: '{{ new_rule.existing_rule | default(omit, true) }}'
+      commit: false
