@@ -13,22 +13,28 @@
     include_vars: 'firewall-secrets.yml'
     no_log: 'yes'
 
-  - name: Set up an empty list variables
+  - name: Set up variables
     set_fact:
-      vsys1_rules: []
+      vsys_var: 'vsys1'
+      vsys_rules: []  
 
-  - name: Build a list of vsys1 unused rules from a file
+  - name: Set up path variable for the list of rules
     set_fact:
-      vsys1_rules: '{{ vsys1_rules + [ item ] }}'
-    with_lines: cat ./vars/vsys1_rules
+      path: './vars/{{ vsys_var }}_rules'
 
-  - name: Get all rules in vsys1 and their config
+  - name: Build a list of unused rules from a file
+    set_fact:
+      vsys_rules: '{{ vsys_rules + [ item ] }}'
+    with_lines: cat '{{ path }}'
+
+  - name: Get all rules and their config
     panos_security_rule_facts:
       provider: '{{ provider }}'
       all_details: 'yes'
+      vsys: '{{ vsys_var }}'
     register: all_rules
 
-  - name: Disable unused rules in vsys1
+  - name: Disable unused rules
     panos_security_rule:
       provider: '{{ provider }}'
       rule_name: '{{ item.rule_name }}'
@@ -60,7 +66,7 @@
       spyware: '{{ item.spyware[0] | default(omit, true) }}'
       tag_name: '{{ item.tag_name | default(omit, true) }}'
       url_filtering: '{{ item.url_filtering[0] | default(omit, true) }}'
-      vsys: 'vsys1'
+      vsys: '{{ vsys_var }}'
       vulnerability: '{{ item.vulnerability[0] | default(omit, true) }}'
       wildfire_analysis: '{{ item.wildfire_analysis[0] | default(omit, true) }}'
       commit: false
@@ -68,4 +74,4 @@
     loop_control:
       label: '{{ item.rule_name }}'
     when:
-      - item.rule_name in vsys1_rules
+      - item.rule_name in vsys_rules
