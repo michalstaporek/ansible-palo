@@ -11,15 +11,6 @@
     include_vars: 'firewall-secrets.yml'
     no_log: 'yes'
 
-#  - name: Set up an empty dictionary variable
-#    set_fact:
-#      new_rule: []
-#
-#  - name: Build a list of policy atributes from a file
-#    set_fact:
-#      new_rule: '{{ new_rule|combine(item) }}'
-#    with_lines: cat ./vars/new_rule
-
   - name: include vars from new_rule.yaml into new_rule variable
     include_vars: 
       file: new_rule.yml
