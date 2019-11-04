@@ -1,0 +1,32 @@
+
+---
+
+- name: Disable existing security rules on the firewall
+  hosts: localhost
+  connection: local
+  gather_facts: False
+
+  roles:
+    - role: PaloAltoNetworks.paloaltonetworks
+
+  tasks:
+  - name: Grab the credentials from ansible-vault
+    include_vars: 'firewall-secrets.yml'
+    no_log: 'yes'
+
+  - name: Set up variables
+    set_fact:
+      vsys_var: 'vsys1'
+
+  - name: Set up path variable for the list of rules
+    set_fact:
+      path: './vars/{{ vsys_var }}_rules'
+
+  - name: Delete rules
+    panos_security_rule:
+      provider: '{{ provider }}'
+      rule_name: '{{ item }}'
+      state: 'absent'
+      vsys: '{{ vsys_var}}'
+      commit: 'false'
+    with_lines: cat '{{ path }}'
