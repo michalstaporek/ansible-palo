@@ -4,6 +4,9 @@
   hosts: localhost
   connection: local
   gather_facts: False
+  vars:
+    vsys_var: 'vsys1'
+    path: './vars/{{ vsys_var }}_rules'
 
   roles:
     - role: PaloAltoNetworks.paloaltonetworks
@@ -12,14 +15,6 @@
   - name: Grab the credentials from ansible-vault
     include_vars: 'firewall-secrets.yml'
     no_log: 'yes'
-
-  - name: Set up variables
-    set_fact:
-      vsys_var: 'vsys1'
-
-  - name: Set up path variable for the list of rules
-    set_fact:
-      path: './vars/{{ vsys_var }}_rules'
 
   - name: Delete rules
     panos_security_rule:
